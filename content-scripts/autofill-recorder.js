@@ -97,12 +97,13 @@
     });
   }
 
-  // Initialize when the DOM is loaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attachListeners);
-  } else {
-    // DOM is already loaded
-    attachListeners();
+  // Initialize when the DOM is loaded with error handling
+  function init() {
+    try {
+      attachListeners();
+    } catch (error) {
+      console.warn('Autofill recorder initialization failed:', error);
+    }
   }
   
   // Also attach listeners when the page content changes dynamically
@@ -136,9 +137,28 @@
     });
   });
   
-  // Start observing
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
+  // Start observing with a more lightweight approach
+  function startObserver() {
+    // Only start observer on forms or pages with input fields
+    const hasInputFields = document.querySelector('input, textarea, select');
+    if (hasInputFields) {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+  }
+  
+  // Initialize in a non-blocking way
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(() => {
+      init();
+      startObserver();
+    }, 10);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      startObserver();
+    });
+  }
 })();

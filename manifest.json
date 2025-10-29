@@ -18,7 +18,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["http://*/*", "https://*/*"],
+      "exclude_matches": [
+        "https://chrome.google.com/*",
+        "https://accounts.google.com/*",
+        "https://*.google.com/settings/*",
+        "https://*.microsoft.com/*"
+      ],
       "js": [
         "content.js", 
         "content-scripts/textExpansion.js", 
@@ -27,7 +33,7 @@
         "content-scripts/autofill-recorder.js",
         "content-scripts/autofill-injector.js"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
   "action": {

@@ -56,14 +56,19 @@
     observeDOM() {
       if (!this.settings.enabled) return;
       
+      // Use a more lightweight approach to avoid performance issues
       const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              this.processNewContent(node);
-            }
+        // Process mutations in a debounced way to avoid performance issues
+        clearTimeout(this.observerTimeout);
+        this.observerTimeout = setTimeout(() => {
+          mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                this.processNewContent(node);
+              }
+            });
           });
-        });
+        }, 100); // Debounce for 100ms
       });
       
       observer.observe(document.body, {
@@ -77,6 +82,10 @@
     
     // Process existing content on the page
     processExistingContent() {
+      // Only process content on messaging platforms to avoid performance issues
+      const isMessagingPlatform = this.isMessagingPlatform();
+      if (!isMessagingPlatform) return;
+      
       // Different selectors for different messaging platforms
       const selectors = [
         // WhatsApp Web
@@ -107,9 +116,28 @@
       });
     },
     
+    // Check if current page is a messaging platform
+    isMessagingPlatform() {
+      const messagingPlatforms = [
+        'web.whatsapp.com',
+        'messenger.com',
+        'web.telegram.org',
+        'mail.google.com',
+        'slack.com',
+        'discord.com'
+      ];
+      
+      return messagingPlatforms.some(platform => 
+        window.location.hostname.includes(platform));
+    },
+    
     // Process new content added to the DOM
     processNewContent(node) {
       if (!this.settings.enabled) return;
+      
+      // Only process content on messaging platforms to avoid performance issues
+      const isMessagingPlatform = this.isMessagingPlatform();
+      if (!isMessagingPlatform) return;
       
       // Check if the node itself matches any selectors
       this.checkAndProcessElement(node);
@@ -137,6 +165,7 @@
     // Check and process an element if it matches criteria
     checkAndProcessElement(element) {
       if (!element.dataset.refyneTranslated && 
+          element.textContent && 
           element.textContent.trim().length > 0 &&
           !this.isInputElement(element)) {
         this.processElement(element);
@@ -431,18 +460,6 @@
     }
   };
 
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => TranslationUI.init());
-  } else {
-    TranslationUI.init();
-  }
-  
-  // Also initialize on document interactive state
-  if (document.readyState === 'interactive') {
-    TranslationUI.init();
-  }
-  
   // Expose TranslationUI globally for use by other scripts
   window.TranslationUI = TranslationUI;
 })();

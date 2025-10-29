@@ -1,24 +1,151 @@
 console.log("Refyne content script loaded");
 
-const tooltip = document.createElement("div");
-Object.assign(tooltip.style, {
-    position: "fixed",
-    background: "#fff",
-    border: "1px solid #ccc",
-    padding: "12px 16px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-    zIndex: "1000000",
-    display: "none",
-    fontSize: "14px",
-    maxWidth: "400px",
-    minWidth: "300px",
-    cursor: "pointer",
-    fontFamily: "Arial, sans-serif",
-    lineHeight: "1.5"
-});
-document.body.appendChild(tooltip);
+// Create a single initialization function that loads all features
+function initRefyne() {
+  // Initialize all features in a non-blocking way
+  setTimeout(() => {
+    try {
+      initCoreFeatures();
+    } catch (error) {
+      console.error("Refyne core features initialization failed:", error);
+    }
+  }, 10);
+  
+  // Initialize UI features after a longer delay
+  setTimeout(() => {
+    try {
+      initUIFeatures();
+    } catch (error) {
+      console.error("Refyne UI features initialization failed:", error);
+    }
+  }, 50);
+}
 
+// Initialize core features (grammar checking, text expansion, etc.)
+async function initCoreFeatures() {
+  console.log("Initializing Refyne core features...");
+  
+  // Initialize text expansion
+  try {
+    if (typeof window.TextExpansion !== 'undefined') {
+      await window.TextExpansion.init();
+      console.log("Text expansion initialized");
+    }
+  } catch (error) {
+    console.warn("Text expansion initialization failed:", error);
+  }
+  
+  // Initialize translation service
+  try {
+    if (typeof window.TranslationService !== 'undefined') {
+      await window.TranslationService.init();
+      console.log("Translation service initialized");
+    }
+  } catch (error) {
+    console.warn("Translation service initialization failed:", error);
+  }
+  
+  // Initialize offline checker
+  try {
+    initializeOfflineChecker();
+    console.log("Offline checker initialized");
+  } catch (error) {
+    console.warn("Offline checker initialization failed:", error);
+  }
+  
+  // Initialize AI features if available
+  try {
+    await initializeRewriter();
+    console.log("AI features initialized");
+  } catch (error) {
+    console.warn("AI features initialization failed:", error);
+  }
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  console.log("Refyne core features initialized");
+}
+
+// Initialize UI features (translation UI, autofill, etc.)
+async function initUIFeatures() {
+  console.log("Initializing Refyne UI features...");
+  
+  // Initialize translation UI
+  try {
+    if (typeof window.TranslationUI !== 'undefined') {
+      await window.TranslationUI.init();
+      console.log("Translation UI initialized");
+    }
+  } catch (error) {
+    console.warn("Translation UI initialization failed:", error);
+  }
+  
+  console.log("Refyne UI features initialized");
+}
+
+// Set up event listeners
+function setupEventListeners() {
+  try {
+    document.addEventListener("input", handleInput, true);
+    document.addEventListener("click", (e) => { 
+      try {
+        if (tooltip && tooltip.contains && !tooltip.contains(e.target)) hideTooltip(); 
+      } catch (error) {
+        console.warn("Click handler error:", error);
+      }
+    }, true);
+    document.addEventListener("scroll", () => {
+      try {
+        hideTooltip();
+      } catch (error) {
+        console.warn("Scroll handler error:", error);
+      }
+    }, true);
+  } catch (error) {
+    console.warn("Failed to add event listeners:", error);
+  }
+}
+
+// ... rest of the existing code remains the same ...
+
+let tooltip = null;
+function createTooltip() {
+    if (tooltip) return tooltip;
+    
+    tooltip = document.createElement("div");
+    Object.assign(tooltip.style, {
+        position: "fixed",
+        background: "#fff",
+        border: "1px solid #ccc",
+        padding: "12px 16px",
+        borderRadius: "8px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        zIndex: "1000000",
+        display: "none",
+        fontSize: "14px",
+        maxWidth: "400px",
+        minWidth: "300px",
+        cursor: "pointer",
+        fontFamily: "Arial, sans-serif",
+        lineHeight: "1.5"
+    });
+    
+    // Only append to document body when we're sure it exists
+    if (document.body) {
+        document.body.appendChild(tooltip);
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+                document.body.appendChild(tooltip);
+            }
+        });
+    }
+    
+    return tooltip;
+}
+
+// Initialize variables only when needed
 let debounceTimeout = null;
 let activeTarget = null;
 let activeSuggestion = null;
@@ -239,6 +366,8 @@ function stopSpeaking() {
         speechSynthesis.cancel();
     }
 }
+
+// Make initialization non-blocking and defer heavy operations
 async function initializeRewriter() {
     // First check if we're in a supported environment
     if (!window.isSecureContext) {
@@ -319,6 +448,10 @@ async function initializeRewriter() {
 }
 
 function showStatusMessage(message, type = "info") {
+    // Only show status messages on pages with editable content
+    const isEditablePage = document.querySelector('input, textarea, [contenteditable]');
+    if (!isEditablePage) return;
+    
     let statusDiv = document.getElementById("refyne-status-message");
     if (!statusDiv) {
         statusDiv = document.createElement("div");
@@ -417,6 +550,8 @@ async function getSuggestions(text) {
 }
 
 async function showTooltip(html, x, y, applyCallback, source = "ai", suggestionText = "") {
+    const tooltip = createTooltip();
+    
     const sourceIndicator = source === "offline" 
         ? '<div style="font-size:10px;color:#888;text-align:right;margin-top:8px;">🔒 Offline Mode</div>'
         : '<div style="font-size:10px;color:#888;text-align:right;margin-top:8px;">🤖 AI Powered</div>';
@@ -469,7 +604,9 @@ async function showTooltip(html, x, y, applyCallback, source = "ai", suggestionT
 }
 
 function hideTooltip() {
-    tooltip.style.display = "none";
+    if (tooltip) {
+        tooltip.style.display = "none";
+    }
 }
 
 function getTextFromElement(el) {
@@ -663,50 +800,33 @@ async function getAIStatus() {
     }
 }
 
-(async function init() {
-    console.log("Refyne content script initializing...");
-    console.log("Rewriter API available:", isChromeAIAvailable());
-    
-    try {
-        const response = await new Promise(resolve => {
-            chrome.runtime.sendMessage({ action: 'checkEnabled' }, resolve);
-        });
-        isEnabled = response?.enabled !== false;
-    } catch (err) {
-        isEnabled = true;
-    }
-    const offlineInitialized = initializeOfflineChecker();
-    console.log("Offline checker initialized:", offlineInitialized);
-    
-    const aiInitialized = await initializeRewriter();
-    
-    // Initialize translation service and UI
-    if (typeof window.TranslationService !== 'undefined') {
-        await window.TranslationService.init();
-        console.log("Translation service initialized");
-    }
-    
-    if (typeof window.TranslationUI !== 'undefined') {
-        await window.TranslationUI.init();
-        console.log("Translation UI initialized");
-    }
-    
-    if (aiInitialized || offlineInitialized) {
-        console.log("Refyne initialized successfully!");
-        console.log("AI Mode:", aiInitialized ? "Active" : "Unavailable");
-        console.log("Offline Mode:", offlineMode ? "Active" : "Inactive");
-        
-        document.addEventListener("input", handleInput, true);
-        document.addEventListener("click", (e) => { 
-            if (!tooltip.contains(e.target)) hideTooltip(); 
-        }, true);
-        document.addEventListener("scroll", hideTooltip, true);
+// Initialize when DOM is ready but don't block page loading
+// Use a more robust initialization approach
+function robustInit() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initRefyne);
+    } else if (document.readyState === 'interactive') {
+        // DOM is partially loaded, init with a small delay
+        setTimeout(initRefyne, 10);
     } else {
-        console.log("Refyne initialization failed completely");
-        showStatusMessage("Refyne failed to initialize", "error");
-        setTimeout(hideStatusMessage, 3000);
+        // DOM is fully loaded
+        initRefyne();
     }
-})();
+}
+
+// Add an additional safety check to ensure we don't block page loading
+if (typeof window !== 'undefined') {
+    // Ensure we don't block the page from loading
+    if (document.readyState === 'complete') {
+        // Page is fully loaded, initialize immediately
+        setTimeout(initRefyne, 10);
+    } else {
+        // Page is still loading, wait for the right moment
+        robustInit();
+    }
+} else {
+    console.warn("Refyne: Window object not available, skipping initialization");
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'enabledStateChanged') {

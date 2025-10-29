@@ -26,10 +26,6 @@
         }
       });
       
-      // Listen for keyboard events on text input fields
-      document.addEventListener('input', this.handleInput.bind(this), true);
-      document.addEventListener('keydown', this.handleKeyDown.bind(this), true);
-      
       console.log('TextExpansion: Initialized');
     },
     
@@ -240,15 +236,10 @@
     }
   };
 
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => TextExpansion.init());
-  } else {
-    TextExpansion.init();
-  }
+  // Expose TextExpansion globally for use by other scripts
+  window.TextExpansion = TextExpansion;
   
-  // Also initialize on document interactive state
-  if (document.readyState === 'interactive') {
-    TextExpansion.init();
-  }
+  // Also set up event listeners
+  document.addEventListener('input', TextExpansion.handleInput.bind(TextExpansion), true);
+  document.addEventListener('keydown', TextExpansion.handleKeyDown.bind(TextExpansion), true);
 })();

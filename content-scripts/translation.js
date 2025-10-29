@@ -396,18 +396,6 @@
     }
   };
 
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => TranslationService.init());
-  } else {
-    TranslationService.init();
-  }
-  
-  // Also initialize on document interactive state
-  if (document.readyState === 'interactive') {
-    TranslationService.init();
-  }
-  
   // Expose TranslationService globally for use by other scripts
   window.TranslationService = TranslationService;
 })();
