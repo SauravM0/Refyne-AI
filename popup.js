@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       case "unavailable":
       default:
         statusDiv.className = "status error";
-        statusDiv.textContent = "🔒 " + message;
+        statusDiv.textContent = "🔒 " + message + " - Auto-fill still works!";
         break;
     }
   }

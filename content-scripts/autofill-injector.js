@@ -176,7 +176,7 @@
     
     // Rewrite & Fill button
     const rewriteButton = document.createElement('button');
-    rewriteButton.textContent = 'Rewrite & Fill';
+    rewriteButton.textContent = 'Fill with AI';
     rewriteButton.style.flex = '1';
     rewriteButton.style.padding = '8px 12px';
     rewriteButton.style.backgroundColor = '#4285f4';
@@ -185,25 +185,47 @@
     rewriteButton.style.borderRadius = '4px';
     rewriteButton.style.cursor = 'pointer';
     rewriteButton.style.fontWeight = '500';
+    
+    // Check if AI is available
+    let isAIAvailable = false;
+    try {
+      isAIAvailable = typeof self.Rewriter !== 'undefined' && 
+                      window.isSecureContext;
+    } catch (e) {
+      isAIAvailable = false;
+    }
+    
+    if (!isAIAvailable) {
+      rewriteButton.textContent = 'Fill Answer';
+      rewriteButton.title = 'AI not available - filling with saved answer';
+    }
+    
     rewriteButton.addEventListener('click', function() {
-      // Show loading indicator
-      const originalText = rewriteButton.textContent;
-      rewriteButton.textContent = 'Rewriting...';
-      rewriteButton.disabled = true;
-      rewriteButton.style.opacity = '0.7';
-      
-      // Show loading toast
-      showToast('Rewriting with AI...');
-      
-      // In a real implementation, this would call your AI service
-      // For now, we'll simulate with a timeout
-      setTimeout(function() {
-        // Simulate AI rewrite (in reality, you would call your AI service here)
-        const rewrittenText = savedEntry.answer + " (AI enhanced version)";
-        input.value = rewrittenText;
+      if (isAIAvailable) {
+        // Show loading indicator
+        const originalText = rewriteButton.textContent;
+        rewriteButton.textContent = 'Rewriting...';
+        rewriteButton.disabled = true;
+        rewriteButton.style.opacity = '0.7';
+        
+        // Show loading toast
+        showToast('Rewriting with AI...');
+        
+        // In a real implementation, this would call your AI service
+        // For now, we'll simulate with a timeout
+        setTimeout(function() {
+          // Simulate AI rewrite (in reality, you would call your AI service here)
+          const rewrittenText = savedEntry.answer + " (AI enhanced version)";
+          input.value = rewrittenText;
+          document.body.removeChild(tooltip);
+          showToast('Answer rewritten and filled');
+        }, 2000);
+      } else {
+        // Fill with saved answer directly when AI is not available
+        input.value = savedEntry.answer;
         document.body.removeChild(tooltip);
-        showToast('Answer rewritten and filled');
-      }, 2000);
+        showToast('Answer filled');
+      }
     });
     buttonContainer.appendChild(rewriteButton);
     

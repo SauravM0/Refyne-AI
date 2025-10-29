@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <title>Translation Settings - Refyne</title>
   <link rel="stylesheet" href="options_common.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="header">
+    <div class="header-icon">🌐</div>
     <h1>Translation Settings</h1>
     <p>Configure how Refyne handles language translation.</p>
   </div>
@@ -182,7 +184,7 @@
         <section class="preferred-languages-section">
           <div class="section-header">
             <h3>Your Preferred Languages</h3>
-            <button id="addLanguage" class="btn-primary">Add Language</button>
+            <button id="addLanguage" class="btn-primary">+ Add Language</button>
           </div>
           
           <div class="table-container">
@@ -200,7 +202,9 @@
           </div>
           
           <div id="emptyState" class="empty-state">
-            <p>No preferred languages configured yet. Add your first language!</p>
+            <div class="empty-icon">🌐</div>
+            <h3>No Preferred Languages Configured!</h3>
+            <p>Add your preferred languages for better translation accuracy.</p>
           </div>
         </section>
       </div>

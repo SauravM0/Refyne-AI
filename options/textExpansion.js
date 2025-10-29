@@ -4,6 +4,17 @@
  */
 
 document.addEventListener('DOMContentLoaded', async function() {
+  // Add animation to cards
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 100 * index);
+  });
   // DOM Elements
   const toggleEnabled = document.getElementById('toggleEnabled');
   const shortcutsList = document.getElementById('shortcutsList');
@@ -113,7 +124,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         </td>
       `;
       
+      // Add animation
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(20px)';
+      
       shortcutsList.appendChild(row);
+      
+      // Add animation
+      setTimeout(() => {
+        row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        row.style.opacity = '1';
+        row.style.transform = 'translateX(0)';
+      }, 50 * index);
     });
     
     // Add event listeners to edit/delete buttons
@@ -312,7 +334,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   function showToast(message, type = 'success') {
     toast.textContent = message;
     toast.className = type;
-    toast.classList.add('show');
+    
+    // Add animation
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
     
     setTimeout(() => {
       toast.classList.remove('show');

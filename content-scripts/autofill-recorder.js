@@ -101,6 +101,8 @@
   function init() {
     try {
       attachListeners();
+      // Also check periodically for new forms
+      setInterval(attachListeners, 3000);
     } catch (error) {
       console.warn('Autofill recorder initialization failed:', error);
     }

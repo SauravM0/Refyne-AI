@@ -63,7 +63,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.get(['recordFormData', 'savedEntries'], (result) => {
     if (result.recordFormData === undefined) {
       chrome.storage.sync.set({
-        recordFormData: false
+        recordFormData: true  // Enable recording by default
       });
     }
     

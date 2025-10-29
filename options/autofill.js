@@ -2,6 +2,17 @@ let currentEditIndex = null;
 
 // Load state on page load
 document.addEventListener('DOMContentLoaded', function() {
+  // Add animation to cards
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 100 * index);
+  });
   // Load the recording toggle state
   chrome.storage.sync.get(['recordFormData'], function(result) {
     const recordToggle = document.getElementById('record-toggle');
@@ -51,6 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
     this.classList.toggle('active');
     const content = this.nextElementSibling;
     content.classList.toggle('expanded');
+    
+    // Add animation effect
+    if (this.classList.contains('active')) {
+      this.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        this.style.transform = '';
+      }, 300);
+    }
   });
 
   // Close modal when clicking outside
@@ -130,7 +149,18 @@ function renderEntries(entries) {
       editEntry(entry, index);
     });
     
+    const entryElement = entryClone.firstElementChild;
+    entryElement.style.opacity = '0';
+    entryElement.style.transform = 'translateX(20px)';
+    
     listContainer.appendChild(entryClone);
+    
+    // Add animation
+    setTimeout(() => {
+      entryElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      entryElement.style.opacity = '1';
+      entryElement.style.transform = 'translateX(0)';
+    }, 50 * index);
   });
 }
 
@@ -230,12 +260,12 @@ function showToast(message, type) {
   // Add to document
   document.body.appendChild(toast);
   
-  // Show toast
+  // Show toast with animation
   setTimeout(() => {
     toast.classList.add('show');
   }, 100);
   
-  // Hide toast after delay
+  // Hide toast after delay with animation
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => {
